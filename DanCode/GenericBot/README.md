@@ -10,6 +10,13 @@ The configuration is communcated via java properties.  In this case the property
 
 This property is set in the command line when the java program is invoked.  See the code in ParallelRun.
 
+## Building the robot ##
+
+The makefile in this directory should build the robot and upon successful build, place a copy in the robots directory.
+
+```bash
+make
+```
 
 ### Semi outdated note information ###
 
