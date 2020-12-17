@@ -10,7 +10,7 @@ import numpy as np
 #   sublists: 0 - movement pattern, 1 - minimum distance, 2 - maximum distance,
 #               3 - minimum rotation, 4 - maximum rotation, 5 - max movement delay,
 #               6 - movement direction, 7 - movement velocity.
-#NOTE: Might just want to have this a a list with labels
+#NOTE: Might just want to have this as a list with labels
 '''
 MOVEMENT_OPTIONS = {"pattern"   : [0, 5],
                     "minDist"   : [0, 100],
@@ -32,6 +32,17 @@ BULLET_STRAT_OPTIONS = [[0, 4]]
 '''TARGETING_OPTIONS = {"pattern" : [0, 3]}'''
 TARGETING_OPTIONS = [[0, 3]]
 
+##### DEBUG VARIABLES AND PARAMETERS #####
+DEBUG = True
+DEBUG_INIT = True
+DEBUG_MAKE_POP = True
+DEBUG_FITNESS = True
+DEBUG_SURVIVOR = True
+DEBUG_PARENT = True
+DEBUG_PROB = True
+DEBUG_RECOMB = True
+DEBUG_MUTATE = True
+
 ########## CLASS AND STRUCTURE DEFINITIONS ##########
 
 
@@ -49,6 +60,14 @@ class GA():
     """
 
     def __init__(self, popSize = 10, initPop = None, numChildren = 2):
+        if DEBUG and DEBUG_INIT:
+            print("--------------------------------------------------")
+            print("STARTING INITIALIZATION")
+            print("Creating population with the following parameters:")
+            print(f"Population size: {popSize}")
+            print(f"Initial population: {initPop}")
+            print(f"Number of children per generation: {numChildren}")
+
         self.generation = 0
         self.nPop = popSize
         self.numChildren = numChildren
@@ -67,30 +86,49 @@ class GA():
             #Converts the csv file into a pandas dataframe.
             self.population = pd.read_csv(initPop)
 
+        if DEBUG and DEBUG_INIT:
+            print("FINISHED INITIALIZATION")
+            print("--------------------------------------------------")
+
     def CreatePop(self):
         #Still needs tweaked to fix the movement direction parameter
-        print("making a population")
+        #Also still needs adjusted to have accurate values (i.e. float vs. integer)
+        if DEBUG and DEBUG_MAKE_POP:
+            print("--------------------------------------------------")
+            print("CREATING A POPULATION")
+
         lenCat = len(MOVEMENT_OPTIONS) + len(BULLET_STRAT_OPTIONS) + len(TARGETING_OPTIONS)
 
         for i in range(self.nPop):
             self.population.iloc[i, 0] = 0
             self.population.iloc[i, lenCat] = 0
 
+            #Set up movement parameters
             for category in range(len(MOVEMENT_OPTIONS)):
                 self.population.iloc[i, category + 1] = random.randrange(MOVEMENT_OPTIONS[category][0], MOVEMENT_OPTIONS[category][1])
 
+            #Set up bullet strategy parameters
             for category in range(len(BULLET_STRAT_OPTIONS)):
                 self.population.iloc[i, len(MOVEMENT_OPTIONS) + category + 1] = random.randrange(MOVEMENT_OPTIONS[category][0], MOVEMENT_OPTIONS[category][1])
 
+            #Set up the targeting parameters
             for category in range(len(TARGETING_OPTIONS)):
                 self.population.iloc[i, len(MOVEMENT_OPTIONS) + len(BULLET_STRAT_OPTIONS) + category + 1] = random.randrange(TARGETING_OPTIONS[category][0], TARGETING_OPTIONS[category][1])
 
+        if DEBUG and DEBUG_MAKE_POP:
+            print("FINISHED MAKING POPULATION")
+            print("--------------------------------------------------")
+
+    ########## GENETIC ALGORITHM FUNCTIONS ##########
+
     def FitnessFunc(self):
-        print("Inside fitness function")
+        if DEBUG and DEBUG_FITNESS:
+            print("Inside fitness function")
         #This would likely read in the file with the scores of each genetic combination.
 
     def SurvivorSelection(self):
-        print("Inside survivor selection")
+        if DEBUG and DEBUG_SURVIVOR:
+            print("Inside survivor selection")
 
         if self.generation == 0:
             self.generation = 1
@@ -99,11 +137,13 @@ class GA():
                                         ignore_index = True)
 
     def ParentSelection(self):
-        print("Inside parent selection function")
+        if DEBUG and DEBUG_PARENT:
+            print("Inside parent selection function")
         #Probably just use the Stochastic Universal Sampling
 
     def CalcProb(self):
-        print("Calculating probability")
+        if DEBUG and DEBUG_PROB:
+            print("Calculating probability")
         cmltFitness = self.population["Score"].sum()
 
         for row in self.population.index:
@@ -143,7 +183,13 @@ class GA():
         return parents
 
     def Recombination(self):
-        print("Inside recombination function")
+        if DEBUG and DEBUG_RECOMB:
+            print("Inside recombination function")
 
     def Mutate(self):
-        print("Inside the mutate function")
+        if DEBUG and DEBUG_MUTATE:
+            print("Inside the mutate function")
+
+    ########## MISC. OTHER FUNCTIONS ##########
+    def PrintPop(self):
+        print(self.population)
