@@ -40,6 +40,7 @@ DEBUG_FITNESS = True
 DEBUG_SURVIVOR = True
 DEBUG_PARENT = True
 DEBUG_PROB = True
+DEBUG_STOCHASTIC = True
 DEBUG_RECOMB = True
 DEBUG_MUTATE = True
 
@@ -71,16 +72,12 @@ class GA():
         self.generation = 0
         self.nPop = popSize
         self.numChildren = numChildren
+        self.parents = None #Will eventually hold a list of indexes.
+        self.children = self._CreateDataframe(initPop)
 
         #initPop is the name of a comma separated variable (csv) file if defined.
         if initPop == None:
-            self.population = pd.DataFrame(columns = ["Score", "Move Pattern",
-                                                      "Min Dist","Max Dist",
-                                                      "Min Rot", "Max Rot",
-                                                      "Move Delay", "Move Dir",
-                                                      "Move Vel", "Bullet Pattern",
-                                                      "Targeting Pattern"],
-                                            index = [i for i in range(popSize)])
+            self.population = self._CreateDataframe(popSize)
             self.CreatePop()
         else:
             #Converts the csv file into a pandas dataframe.
@@ -97,11 +94,9 @@ class GA():
             print("--------------------------------------------------")
             print("CREATING A POPULATION")
 
-        lenCat = len(MOVEMENT_OPTIONS) + len(BULLET_STRAT_OPTIONS) + len(TARGETING_OPTIONS)
-
         for i in range(self.nPop):
-            self.population.iloc[i, 0] = 0
-            self.population.iloc[i, lenCat] = 0
+            self.population.loc[i, "Score"] = 0 # Initializes individual score to zero at start.
+            self.population.loc[i, "Probability"] = 0 # Initializes individual probability to zero at start
 
             #Set up movement parameters
             for category in range(len(MOVEMENT_OPTIONS)):
@@ -115,6 +110,8 @@ class GA():
             for category in range(len(TARGETING_OPTIONS)):
                 self.population.iloc[i, len(MOVEMENT_OPTIONS) + len(BULLET_STRAT_OPTIONS) + category + 1] = random.randrange(TARGETING_OPTIONS[category][0], TARGETING_OPTIONS[category][1])
 
+
+
         if DEBUG and DEBUG_MAKE_POP:
             print("FINISHED MAKING POPULATION")
             print("--------------------------------------------------")
@@ -127,8 +124,11 @@ class GA():
         #This would likely read in the file with the scores of each genetic combination.
 
     def SurvivorSelection(self):
+        #NOTE: Will want to modify how survivors are chosen to carry over.  Right now, just bottom of the
+        #       dataframe is getting cut off each generation.
         if DEBUG and DEBUG_SURVIVOR:
-            print("Inside survivor selection")
+            print("--------------------------------------------------")
+            print("INSIDE SURVIVOR SELECTION")
 
         if self.generation == 0:
             self.generation = 1
@@ -136,18 +136,38 @@ class GA():
             self.population = pd.concat([self.population.iloc[:len(self.population.index) - self.numChildren], self.children],
                                         ignore_index = True)
 
+        if DEBUG and DEBUG_SURVIVOR:
+            print("END OF SURVIVOR SELECTION")
+            print("--------------------------------------------------")
+
     def ParentSelection(self):
         if DEBUG and DEBUG_PARENT:
-            print("Inside parent selection function")
+            print("--------------------------------------------------")
+            print("INSIDE PARENT SELECTION")
         #Probably just use the Stochastic Universal Sampling
+        self.CalcProb()
+        self.parents = self.StochasticUnivSampling(5)
+
+        if DEBUG and DEBUG_PARENT:
+            print("END OF PARENT SELECTION")
+            print("--------------------------------------------------")
 
     def CalcProb(self):
         if DEBUG and DEBUG_PROB:
-            print("Calculating probability")
+            print("--------------------------------------------------")
+            print("INSIDE CALCPROB")
         cmltFitness = self.population["Score"].sum()
 
-        for row in self.population.index:
-            self.population.iloc[row, len(self.population.index) - 1] = self.population.iloc[row, 0] / cmltFitness
+        if cmltFitness == 0:
+            for row in self.population.index:
+                self.population.loc[row, "Probability"] = 1 / len(self.population.index)
+        else:
+            for row in self.population.index:
+                self.population.loc[row, "Probability"] = self.population.loc[row, "Score"] / cmltFitness
+
+        if DEBUG and DEBUG_PROB:
+            print("END OF CALCPROB")
+            print("--------------------------------------------------")
 
     def StochasticUnivSampling(self, numParents):
         """
@@ -158,38 +178,71 @@ class GA():
         numParents : int
             The number of individuals to add to the parent pool.
         """
-        """
-        cmlProb = self.population["probability"].cumsum().tolist()
-        parents = []
+        if DEBUG and DEBUG_STOCHASTIC:
+            print("--------------------------------------------------")
+            print("INSIDE STOCHASTIC UNIVERSAL SAMPLING")
+            print(f"Selecting {numParents} Parents")
 
-        #print(cmlProb)
+        cmlProb = self.population["Probability"].cumsum().tolist()
+        parents = []
 
         currMember = i = 0
         r = random.uniform(0, 1 / numParents)
 
-        #print(f"r is: {r}")
+        if DEBUG and DEBUG_STOCHASTIC:
+            print(f"Cumulative probability is: {cmlProb}")
+            print(f"r is: {r}")
 
         while currMember < numParents:
             while r <= cmlProb[i] and currMember < numParents:
                 parents.append(i)
                 r += 1 / numParents
-                #print(f"r is: {r}")
+                if DEBUG and DEBUG_STOCHASTIC:
+                    print(f"r is: {r}")
                 currMember += 1
 
             i += 1
 
-        #print(f"The parents are:\n{parents}")
-        """
+        if DEBUG and DEBUG_STOCHASTIC:
+            print(f"The parents are:\n{parents}")
+            print("END OF STOCHASTIC UNIVERSAL SAMPLING")
+            print("--------------------------------------------------")
+
         return parents
 
     def Recombination(self):
         if DEBUG and DEBUG_RECOMB:
-            print("Inside recombination function")
+            print("--------------------------------------------------")
+            print("INSIDE RECOMBINATION")
+
+        pairs = []
+
+        #Generate a number of random pairs of parents equal to the number of desired children
+        for i in range(self.numChildren):
+            pairs.append(random.sample(parents, 2))
+
+        for pair in pairs:
+            print("PAIRS!")
+
+        if DEBUG and DEBUG_RECOMB:
+            print("END OF RECOMBINATION")
+            print("--------------------------------------------------")
 
     def Mutate(self):
         if DEBUG and DEBUG_MUTATE:
             print("Inside the mutate function")
 
     ########## MISC. OTHER FUNCTIONS ##########
-    def PrintPop(self):
+    def PrintPopStatus(self):
+        print(f"Current Generation: {self.generation}")
         print(self.population)
+
+    def _CreateDataframe(self, indexSize):
+        dataframe = pd.DataFrame(columns = ["Score", "Move Pattern",
+                                                  "Min Dist","Max Dist",
+                                                  "Min Rot", "Max Rot",
+                                                  "Move Delay", "Move Dir",
+                                                  "Move Vel", "Bullet Pattern",
+                                                  "Targeting Pattern", "Probability"],
+                                 index = [i for i in range(indexSize)])
+        return dataframe
