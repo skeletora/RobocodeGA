@@ -8,7 +8,10 @@ This code is very much a work in progress.  It will be changing.
 ## Communicating the Configuration ##
 The configuration is communcated via java properties.  In this case the property "ROBOT_GENE" is parsed for configuration information.
 
-**Semi outdated note information**
+This property is set in the command line when the java program is invoked.  See the code in ParallelRun.
+
+
+### Semi outdated note information ###
 
 This can, and probably will change.
 
@@ -22,3 +25,8 @@ Move Mode is 0 for move and turn
              1 for move or turn
 
 Chance to move is only used in mode 1.
+
+## TODO ##
+  * Build wall avoidance code.
+  * Build the methods for the specified behaviors
+  * Clean the code up quite a bit.
