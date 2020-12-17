@@ -1,11 +1,11 @@
-#GenericBot#
+# GenericBot #
 
 This code implements a generic robot in robocode.
 This is the code you should change to change the generic bot.
 
 This code is very much a work in progress.  It will be changing.
 
-##Communicating the Configuration##
+## Communicating the Configuration ##
 The configuration is communcated via java properties.  In this case the property "ROBOT_GENE" is parsed for configuration information.
 
 **Semi outdated note information**
