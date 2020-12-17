@@ -15,7 +15,7 @@ This property is set in the command line when the java program is invoked.  See 
 The makefile in this directory should build the robot and upon successful build, place a copy in the robots directory.
 
 ```bash
-make
+$ make
 ```
 
 ### Semi outdated note information ###

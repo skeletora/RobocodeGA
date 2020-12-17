@@ -1,7 +1,7 @@
 .PHONY: clean
 
 # needs to be set to your robot directory
-ROBOTS = /home/dbennett/robots
+ROBOTS = /home/dbennett/RobocodeGA/DanCode/robots
 
 JCC = /usr/bin/javac
 ROBOCODE_HOME = /usr/local/robocode/current
