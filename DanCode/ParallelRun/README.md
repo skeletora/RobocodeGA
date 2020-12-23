@@ -1,14 +1,14 @@
-**** driver.py ****
+# driver.py # 
 
 The main executable.  This generates 37 different genes and runs them in parallel.  The results are printed.  This will probably be replaced.
 
-**** RunRobocode.py ****
+# RunRobocode.py # 
 This is the script to run the code in parallel.  It takes an array of "genes" and retuns a corresponding array of results.
 
-**** battle.battle ****
+# battle.battle # 
 This file contains the configuration for a battle.  It seems that he wants the extension .battle.  Why fight it.
 
-**** configuration.py ****
+# configuration.py # 
 
 The file configuration.py has paths and other relavant information for running the code in parallel.
 
