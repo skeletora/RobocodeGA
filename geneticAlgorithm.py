@@ -72,7 +72,7 @@ class GA():
         self.VALID_PARENT = {"stochastic" : self.StochasticUnivSampling}
         self.VALID_PROBABILITY = {"score" : self.ScoreBasedProbability}
         self.VALID_RECOMBINATION = {"splice" : self.SpliceGenomes, "weighted average" : self.SimpleArithmRecomb}
-        self.VALID_MUTATION = {}
+        self.VALID_MUTATION = {"gaussian" : self.GaussianMutation}
 
         ##### CLASS VARIABLES #####
         self.generation = 0
@@ -165,7 +165,7 @@ class GA():
 
         self.CalcProb(probMethod)
         #self.parents = self.StochasticUnivSampling(5)
-        self.parents = self.VALID_PARENT[parentMethod](self.numParents)
+        self.parents = self.VALID_PARENT[parentMethod](numParents = self.numParents)
 
         if DEBUG and DEBUG_PARENT:
             print("END OF PARENT SELECTION")
@@ -183,7 +183,6 @@ class GA():
             print("--------------------------------------------------")
 
     def Recombination(self, recombMethod = None, weight = 0.5):
-        #NOTE: NEED TO ADD A VALIDATOR TO THE CHILD GENOMES
         if DEBUG and DEBUG_RECOMB:
             print("--------------------------------------------------")
             print("INSIDE RECOMBINATION")
@@ -203,16 +202,34 @@ class GA():
             if DEBUG and DEBUG_RECOMB:
                 print(f"Pair: {pair}")
                 print(f"childCount: {childCount}")
-            self.VALID_RECOMBINATION[recombMethod](pair[0], pair[1], childCount, weight)
+            self.VALID_RECOMBINATION[recombMethod](parent1 = pair[0], parent2 = pair[1], childCount = childCount, weight = weight)
             childCount += 2
+
+        self._FixGenome(self.children)
 
         if DEBUG and DEBUG_RECOMB:
             print("END OF RECOMBINATION")
             print("--------------------------------------------------")
 
-    def Mutate(self):
+    def Mutate(self, mutationMethod = None, mutationRate = 0.05, mutationVariance = 1.0):
         if DEBUG and DEBUG_MUTATE:
-            print("Inside the mutate function")
+            print("--------------------------------------------------")
+            print("INSIDE MUTATE")
+            print(f"Mutation rate is: {mutationRate}")
+            print(f"Mutation variation is: {mutationVariance}")
+
+        if mutationMethod == None:
+            mutationMethod = self._FirstKey(self.VALID_MUTATION)
+
+        for child in self.children.index:
+            if random.random() <= mutationRate:
+                self.VALID_MUTATION[mutationMethod](individual = child, mutationVariance = mutationVariance)
+
+        self._FixGenome(self.children)
+
+        if DEBUG and DEBUG_MUTATE:
+            print("END OF MUTATE")
+            print("--------------------------------------------------")
 
     ########## SUBFUNCTIONS FOR EACH PHASE ##########
     ##### FITNESS SUBFUNCTIONS #####
@@ -293,7 +310,7 @@ class GA():
             print("--------------------------------------------------")
 
     ##### RECOMBINATION SUBFUNCTIONS #####
-    def SpliceGenomes(self, parent1, parent2, childCount, *args):
+    def SpliceGenomes(self, parent1, parent2, childCount, **kargs):
         if DEBUG and DEBUG_RECOMB:
             print("--------------------------------------------------")
             print("INSIDE SPLICE GENOME")
@@ -373,12 +390,27 @@ class GA():
 
     ##### MUTATION SUBFUNCTIONS #####
 
-    ########## MISC. OTHER FUNCTIONS ##########
-    def ValidateGenome(self):
-        if DEBUG:
+    def GaussianMutation(self, individual, mutationVariance):
+        if DEBUG and DEBUG_MUTATE:
             print("--------------------------------------------------")
-            print("INSIDE VALIDATE GENOME")
+            print("INSIDE GAUSSIAN MUTATION")
 
+        genomeCat = ["Move Pattern","Min Dist","Max Dist","Min Rot", "Max Rot","Move Delay",
+                     "Move Dir","Move Vel", "Bullet Pattern","Targeting Pattern"]
+
+        for category in genomeCat:
+            if DEBUG and DEBUG_MUTATE:
+                print(f"Before mutation of child {individual} in category {category}: {self.children.loc[individual, category]}")
+            self.children.loc[individual, category] = np.random.normal(loc = self.children.loc[individual, category],
+                                                                       scale = mutationVariance)
+            if DEBUG and DEBUG_MUTATE:
+                print(f"After mutation of child {individual} in category {category}: {self.children.loc[individual, category]}")
+
+        if DEBUG and DEBUG_MUTATE:
+            print("END OF GAUSSIAN MUTATION")
+            print("--------------------------------------------------")
+
+    ########## MISC. OTHER FUNCTIONS ##########
     def PrintPopStatus(self):
         print(f"Current Generation: {self.generation}")
         print(self.population)
@@ -392,6 +424,22 @@ class GA():
                                                   "Targeting Pattern", "Probability"],
                                  index = [i for i in range(indexSize)])
         return dataframe
+
+    def _FixGenome(self, df):
+        #NOTE: STILL NEED TO ADD VALUE CLAMPING
+        if DEBUG:
+            print("--------------------------------------------------")
+            print("INSIDE FIX GENOME")
+
+        for index in df.index:
+            for column in df.columns:
+                if DEBUG:
+                    print(f"Rounding {df.loc[index, column]} at ({index}, {column})")
+                df.loc[index, column] = int(round(df.loc[index, column]))
+
+        if DEBUG:
+            print("END OF FIX GENOME")
+            print("--------------------------------------------------")
 
     def _FirstKey(self, dict):
         if len(list(dict.keys())) > 0:
