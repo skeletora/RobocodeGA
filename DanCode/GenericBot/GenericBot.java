@@ -20,14 +20,13 @@ public class GenericBot extends AdvancedRobot
     double distance=0;;
     double angle=0;
 
+    Parser parser;
+/*
     void ReadParams() {
 
         String data;
 
         // experiment with getting properties.
-        data = System.getProperty("ROBOT_GENE");
-        out.println("Gene" + data);
-
         String[] cmds = data.split(":");
         String[] move = cmds[0].split(",");
 
@@ -49,7 +48,7 @@ public class GenericBot extends AdvancedRobot
               movePct = Double.parseDouble(move[5]);
         }
     }
-
+*/
     double Between(double min, double max) {
         
        double delta = max - min;
@@ -122,7 +121,7 @@ public class GenericBot extends AdvancedRobot
         // body,gun,radar
        setColors(Color.blue,Color.blue,Color.red); 
 	
-       ReadParams();
+       //ReadParams();
        while(true) {
            DoMove();
 
@@ -142,3 +141,71 @@ public class GenericBot extends AdvancedRobot
         setBack(distance * 10);
     }	
 }
+
+enum  ActionT {
+    MOVEMENT (0),
+    TARGET (1),
+    BULLET (2);
+
+    int index;
+
+    ActionT(int index) {
+        this.index = index;
+    }
+
+    double index() { return index;}
+}
+
+
+class Parser {
+
+    double config[][];
+
+    Parser() {
+        int i;
+
+        String data = System.getProperty("ROBOT_GENE");
+        System.out.println("Gene" + data);
+
+        String[] cmds = data.split(":");
+
+	config = new double[cmds.length][];
+
+	for(i=0; i < cmds.length; i++) {
+	    config[i] = ParseCommand(cmds[i]);
+	}
+    }
+
+    double[] ParseCommand(String cmd) {
+
+	int i;
+
+        String[] bits;
+	bits = cmd.split(",");
+
+	double[] rv = new double[bits.length];
+
+	for(i = 0; i < bits.length; i++) {
+            rv[i] =   Double.parseDouble(bits[i]);
+	}
+
+	return rv;
+    }
+
+    public double MethodID (ActionT actionClass) {
+	if (actionClass.index >= 0 && actionClass.index < config.length) {
+            return config[actionClass.index][0]; 
+	} 
+	return -1;
+    }
+
+    public double Argument(ActionT actionClass, int methodIndex) {
+	if (actionClass.index >= 0 && actionClass.index < config.length) {
+            if (methodIndex >= 0 && methodIndex < config[actionClass.index].length){
+		 return config[actionClass.index][methodIndex];
+	    }
+	}
+	return -1;
+    }
+}
+

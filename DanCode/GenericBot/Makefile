@@ -18,4 +18,4 @@ GenericBot.class: GenericBot.java
 	cp GenericBot.class ${ROBOTS}/GenericBot
 
 clean:
-	rm -f GenericBot.class
+	rm -f *.class
