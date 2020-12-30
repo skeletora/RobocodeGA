@@ -13,21 +13,15 @@ import numpy as np
 #   sublists: 0 - movement pattern, 1 - minimum distance, 2 - maximum distance,
 #               3 - minimum rotation, 4 - maximum rotation, 5 - max movement delay,
 #               6 - movement direction, 7 - movement velocity.
-'''
-MOVEMENT_OPTIONS = {"pattern"   : [0, 5], "minDist"   : [0, 100], "maxDist"   : [0, 100],
-                    "minRot"    : [0, 360], "maxRot"    : [0, 360], "moveDelay" : [0, 10],
-                    "moveDir"   : [-1, 1], "moveVel"   : [0, 8]}
-'''
-MOVEMENT_OPTIONS = [[0, 5], [0, 100], [0, 100], [0, 360], [0, 360],
-                    [0, 10], [-1, 1], [0, 8]]
+MOVEMENT_OPTIONS = {"Move Pattern" : [0, 5],   "Min Dist" : [0, 100], "Max Dist"   : [0, 100],
+                    "Min Rot"      : [0, 360], "Max Rot"  : [0, 360], "Move Delay" : [0, 10],
+                    "Move Dir"     : [-1, 1],  "Move Vel" : [0, 8]}
 
 #Valid options for bullet strategy
-'''BULLET_STRAT_OPTIONS = {"pattern" : [0, 4]}'''
-BULLET_STRAT_OPTIONS = [[0, 4]]
+BULLET_STRAT_OPTIONS = {"Bullet Pattern" : [0, 4]}
 
 #Valid options for targeting strategies
-'''TARGETING_OPTIONS = {"pattern" : [0, 3]}'''
-TARGETING_OPTIONS = [[0, 3]]
+TARGETING_OPTIONS = {"Targeting Pattern" : [0, 3]}
 
 ##### DEBUG VARIABLES AND PARAMETERS #####
 DEBUG = True
@@ -45,6 +39,7 @@ DEBUG_MUTATE = True
 
 
 
+########## FUNCTION DEFINITIONS ##########
 
 
 
@@ -101,21 +96,24 @@ class GA():
             print("--------------------------------------------------")
             print("CREATING A POPULATION")
 
-        for i in range(self.nPop):
+        for i in self.population.index:
             self.population.loc[i, "Score"] = 0 # Initializes individual score to zero at start.
             self.population.loc[i, "Probability"] = 0 # Initializes individual probability to zero at start
 
             #Set up movement parameters
-            for category in range(len(MOVEMENT_OPTIONS)):
-                self.population.iloc[i, category + 1] = random.randrange(MOVEMENT_OPTIONS[category][0], MOVEMENT_OPTIONS[category][1])
+            for category in MOVEMENT_OPTIONS.keys():
+                if category == "Move Dir":
+                    self.population.loc[i, category] = random.choice(MOVEMENT_OPTIONS[category])
+                else:
+                    self.population.loc[i, category] = random.randrange(MOVEMENT_OPTIONS[category][0], MOVEMENT_OPTIONS[category][1] + 1)
 
             #Set up bullet strategy parameters
-            for category in range(len(BULLET_STRAT_OPTIONS)):
-                self.population.iloc[i, len(MOVEMENT_OPTIONS) + category + 1] = random.randrange(MOVEMENT_OPTIONS[category][0], MOVEMENT_OPTIONS[category][1])
+            for category in BULLET_STRAT_OPTIONS.keys():
+                self.population.loc[i, category] = random.randrange(BULLET_STRAT_OPTIONS[category][0], BULLET_STRAT_OPTIONS[category][1] + 1)
 
             #Set up the targeting parameters
-            for category in range(len(TARGETING_OPTIONS)):
-                self.population.iloc[i, len(MOVEMENT_OPTIONS) + len(BULLET_STRAT_OPTIONS) + category + 1] = random.randrange(TARGETING_OPTIONS[category][0], TARGETING_OPTIONS[category][1])
+            for category in TARGETING_OPTIONS.keys():
+                self.population.loc[i, category] = random.randrange(TARGETING_OPTIONS[category][0], TARGETING_OPTIONS[category][1] + 1)
 
 
 
@@ -123,21 +121,24 @@ class GA():
             print("FINISHED MAKING POPULATION")
             print("--------------------------------------------------")
 
-    ########## GENETIC ALGORITHM FUNCTIONS ##########
+    ########## GENETIC ALGORITHM PHASE FUNCTIONS ##########
 
-    def FitnessFunc(self):
+    def FitnessFunc(self, fitMethod = None):
         if DEBUG and DEBUG_FITNESS:
             print("--------------------------------------------------")
             print("INSIDE FITNESS FUNCTION")
-        #This would likely read in the file with the scores of each genetic combination.
+
+        if fitMethod == None:
+            fitMethod = self._FirstKey(self.VALID_FITNESS)
+
+
+        self.VALID_FITNESS[fitMethod]()
 
         if DEBUG and DEBUG_FITNESS:
             print("END OF FITNESS FUNCTION")
             print("--------------------------------------------------")
 
     def SurvivorSelection(self, survivorMethod = None):
-        #NOTE: Will want to modify how survivors are chosen to carry over.  Right now, just bottom of the
-        #       dataframe is getting cut off each generation.
         if DEBUG and DEBUG_SURVIVOR:
             print("--------------------------------------------------")
             print("INSIDE SURVIVOR SELECTION")
@@ -389,7 +390,6 @@ class GA():
             print("--------------------------------------------------")
 
     ##### MUTATION SUBFUNCTIONS #####
-
     def GaussianMutation(self, individual, mutationVariance):
         if DEBUG and DEBUG_MUTATE:
             print("--------------------------------------------------")
@@ -425,17 +425,47 @@ class GA():
                                  index = [i for i in range(indexSize)])
         return dataframe
 
+    def _Clamp(self,value, minValue, maxValue):
+        if DEBUG:
+            print("--------------------------------------------------")
+            print("INSIDE CLAMP")
+            print(f"value: {value} and [min, max]: [{minValue}, {maxValue}]")
+            print("END OF CLAMP")
+            print("--------------------------------------------------")
+        return max(minValue, min(value, maxValue))
+
     def _FixGenome(self, df):
-        #NOTE: STILL NEED TO ADD VALUE CLAMPING
+        #NOTE: STILL NEED TO ADD VALUE CLAMPING AND SET UP TO FIND VALUE RANGES
         if DEBUG:
             print("--------------------------------------------------")
             print("INSIDE FIX GENOME")
+
+        """
+        ["Score", "Move Pattern", "Min Dist","Max Dist", "Min Rot", "Max Rot", "Move Delay", "Move Dir",
+         "Move Vel", "Bullet Pattern", "Targeting Pattern", "Probability"]
+        """
+        skipClamp = False
 
         for index in df.index:
             for column in df.columns:
                 if DEBUG:
                     print(f"Rounding {df.loc[index, column]} at ({index}, {column})")
-                df.loc[index, column] = int(round(df.loc[index, column]))
+
+                if column in MOVEMENT_OPTIONS.keys():
+                    valRange = MOVEMENT_OPTIONS
+                elif column in BULLET_STRAT_OPTIONS.keys():
+                    valRange = BULLET_STRAT_OPTIONS
+                elif column in TARGETING_OPTIONS.keys():
+                    valRange = TARGETING_OPTIONS
+                else:
+                    skipClamp = True
+
+                if DEBUG:
+                    print(f"The value of skipClamp is: {skipClamp}")
+                if not skipClamp:
+                    df.loc[index, column] = self._Clamp(int(round(df.loc[index, column])),(valRange[column][0]), (valRange[column][1]))
+                else:
+                    skipClamp = False
 
         if DEBUG:
             print("END OF FIX GENOME")
