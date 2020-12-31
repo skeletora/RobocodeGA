@@ -1,3 +1,6 @@
+# UPDATES #
+   * Minor change to RunRobocode.py to accomidate new naming schemem for GenericBot.
+
 # driver.py # 
 
 The main executable.  This generates 37 different genes and runs them in parallel.  The results are printed.  This will probably be replaced.

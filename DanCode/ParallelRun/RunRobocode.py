@@ -13,7 +13,7 @@ def RunBot(cmd,bot, fileName):
     subprocess.run(cmd, stdout=subprocess.DEVNULL);
     o = open(fileName)
     for line in o:
-       if line.find("GenericBot.GenericBot*") != -1:
+       if line.find("GenericBot") != -1:
             stats = line.split()
             res.append(bot);
             res.append(stats[0]);
