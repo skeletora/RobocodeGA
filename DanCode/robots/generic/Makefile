@@ -3,9 +3,6 @@
 .java.class:
 	${JC} ${JFLAGS} $*.java
 
-# needs to be set to your robot directory
-ROBOTS = /home/dbennett/RobocodeGA/DanCode/robots
-
 JC = /usr/bin/javac
 
 ROBOCODE_HOME = /usr/local/robocode/current
