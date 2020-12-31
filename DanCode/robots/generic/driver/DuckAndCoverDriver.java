@@ -42,17 +42,16 @@ public class DuckAndCoverDriver extends Driver {
     public void HitByBullet(HitByBulletEvent e) {
         // what angle was the bullet comming from
         double bulletHeading = e.getHeadingRadians();
-        System.out.println("I was hit by a bullet heading " 
-                                           + bulletHeading*RtoD);
+        //System.out.println("Hit by a bullet heading "+bulletHeading*RtoD);
 
         double myAngle = bot.getHeadingRadians();
 
         // what angle do I want to go?
-        double angle = (bulletHeading+turn*Math.PI/2.0)%(PI2);
+        //double angle = (bulletHeading+turn*Math.PI/2.0)%(PI2);
         turn *= -1;
 
-        System.out.println("My Angle is  " + myAngle*RtoD);
-        System.out.println("Setting my angle to  " + angle*RtoD);
+        //System.out.println("My Angle is  " + myAngle*RtoD);
+        //System.out.println("Setting my angle to  " + angle*RtoD);
 
          double left, right;
 
@@ -66,15 +65,14 @@ public class DuckAndCoverDriver extends Driver {
 
          if(left > right) { 
              bot.setTurnRightRadians(right);
-             System.out.println("Turning right by  " + (right)*RtoD);
+             //System.out.println("Turning right by  " + (right)*RtoD);
          } else {
              bot.setTurnLeftRadians(left);
-             System.out.println("Turning left by  " + (left)*RtoD);
+             //System.out.println("Turning left by  " + (left)*RtoD);
          }
 
          turning = 1;
 
          distance = NewDistance();
     }
-
 }
