@@ -90,15 +90,26 @@ class GA():
             print("--------------------------------------------------")
 
     def CreatePop(self):
-        #Still needs tweaked to fix the movement direction parameter
-        #Also still needs adjusted to have accurate values (i.e. float vs. integer)
+        #NOTE: CURRENTLY, IF MIN VALUES ARE GREATHER THAN MAX, THEY ARE SET EQUAL TO THE MAX VALUE
+        #       Also still needs adjusted to have accurate values (i.e. float vs. integer)
         if DEBUG and DEBUG_MAKE_POP:
             print("--------------------------------------------------")
             print("CREATING A POPULATION")
 
+        #This finds all of the minimum and maximum value genes and stores their keys
+        minKeys = []
+        maxKeys = []
+
+        for column in self.population.columns:
+            if "Min" in column:
+                minKeys.append(column)
+            elif "Max" in column:
+                maxKeys.append(column)
+
+        #Randomly generates gene values based on the valid parameters specified above
         for i in self.population.index:
             self.population.loc[i, "Score"] = 0 # Initializes individual score to zero at start.
-            self.population.loc[i, "Probability"] = 0 # Initializes individual probability to zero at start
+            self.population.loc[i, "Probability"] = 0 # Initializes the individual's probability of being selected to zero at start
 
             #Set up movement parameters
             for category in MOVEMENT_OPTIONS.keys():
@@ -115,6 +126,20 @@ class GA():
             for category in TARGETING_OPTIONS.keys():
                 self.population.loc[i, category] = random.randrange(TARGETING_OPTIONS[category][0], TARGETING_OPTIONS[category][1] + 1)
 
+            #This fixes any cases of minimum values being greater than the maximum value
+            for minKey in minKeys:
+                subCat1 = minKey.split()
+
+                for maxKey in maxKeys:
+                    subCat2 = maxKey.split()
+
+                    if subCat1[1] == subCat2[1]:
+                        if DEBUG and DEBUG_MAKE_POP:
+                            print(f"Found a match! It's {minKey} and {maxKey}")
+
+                        if self.population.loc[i, minKey] > self.population.loc[i, maxKey]:
+                            self.population.loc[i, minKey] = self.population.loc[i, maxKey]
+                        break
 
 
         if DEBUG and DEBUG_MAKE_POP:
@@ -165,7 +190,6 @@ class GA():
             parentMethod = self._FirstKey(self.VALID_PARENT)
 
         self.CalcProb(probMethod)
-        #self.parents = self.StochasticUnivSampling(5)
         self.parents = self.VALID_PARENT[parentMethod](numParents = self.numParents)
 
         if DEBUG and DEBUG_PARENT:
@@ -435,7 +459,7 @@ class GA():
         return max(minValue, min(value, maxValue))
 
     def _FixGenome(self, df):
-        #NOTE: STILL NEED TO ADD VALUE CLAMPING AND SET UP TO FIND VALUE RANGES
+        #NOTE: CURRENTLY, IF MIN VALUES ARE GREATER THAN MAX VALUES, THEN JUST SETS MIN EQUAL TO THE MAX
         if DEBUG:
             print("--------------------------------------------------")
             print("INSIDE FIX GENOME")
@@ -445,11 +469,22 @@ class GA():
          "Move Vel", "Bullet Pattern", "Targeting Pattern", "Probability"]
         """
         skipClamp = False
+        minKeys = []
+        maxKeys = []
+        value = 0
+
+        for column in df.columns:
+            if "Min" in column:
+                minKeys.append(column)
+            elif "Max" in column:
+                maxKeys.append(column)
 
         for index in df.index:
             for column in df.columns:
                 if DEBUG:
                     print(f"Rounding {df.loc[index, column]} at ({index}, {column})")
+
+                value = int(round(df.loc[index, column]))
 
                 if column in MOVEMENT_OPTIONS.keys():
                     valRange = MOVEMENT_OPTIONS
@@ -463,9 +498,23 @@ class GA():
                 if DEBUG:
                     print(f"The value of skipClamp is: {skipClamp}")
                 if not skipClamp:
-                    df.loc[index, column] = self._Clamp(int(round(df.loc[index, column])),(valRange[column][0]), (valRange[column][1]))
+                    df.loc[index, column] = self._Clamp(value, valRange[column][0], valRange[column][1])
                 else:
                     skipClamp = False
+
+            for minKey in minKeys:
+                subCat1 = minKey.split()
+
+                for maxKey in maxKeys:
+                    subCat2 = maxKey.split()
+
+                    if subCat1[1] == subCat2[1]:
+                        if DEBUG:
+                            print(f"Found a match! It's {minKey} and {maxKey}")
+
+                        if df.loc[index, minKey] > df.loc[index, maxKey]:
+                            self.population.loc[index, minKey] = self.population.loc[index, maxKey]
+                        break
 
         if DEBUG:
             print("END OF FIX GENOME")
