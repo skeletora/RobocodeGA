@@ -1,8 +1,11 @@
 
-*** GenericBot *** The code here  will be updated when a new robot is built in the top level directory.  Do not change this directly.  Change the code one level up.
+# robots  
+contains  the robots shipped with robocode.
 
-*This code is dead*
+## generic 
 
-*** robots ***  contains  the robots shipped with robocode.
+This is the generic robot generated for this project.  The current working robot is contained in this directory.
 
-The code in robots/generic is the current code.  It should be modified here.
+## sample 
+
+These are the sample robots shipped with robocode.  

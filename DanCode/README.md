@@ -11,7 +11,7 @@ It appears that the robot needs to be placed in a subdirectory by the robot name
 
 When new class of robot is placed in this directory, the robots.database needs to be rebuilt.  Robocode will do this but it may impact a parallel run.  This does not need to be done when a new instance of an existing robot is plalce.  (IE not after a new build, just after a completely new robot is added)
 
-In current work on the generic robot is in  the directory robots/generic.
+Current work on the generic robot is in the directory robots/generic.
 
 
 **ParallelRun**
