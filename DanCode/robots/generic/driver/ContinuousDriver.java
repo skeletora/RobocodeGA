@@ -39,12 +39,10 @@ public class ContinuousDriver extends Driver {
         if (Math.abs(dist) <= 0) {
             distance = NewDistance();
             bot.setAhead(distance);
-            System.out.println("Moving a distance of "+distance);
         }
         if (Math.abs(ang) <=  0 ) {
             angle = NewAngle();
             bot.setTurnRight(angle);
-            System.out.println("Moving at an angle of "+angle);
         }
     }
 }

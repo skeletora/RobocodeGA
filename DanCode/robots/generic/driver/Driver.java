@@ -16,9 +16,9 @@ public class Driver {
     double distance=0;
     double angle = 0;
 
-    public Driver(Parser p, AdvancedRobot bot) {
-        this.bot = bot;
-        this.parser = p;
+    public Driver(Parser p, AdvancedRobot b) {
+        bot = b;
+        parser = p;
     }
 
     public void DoMove() {}
@@ -26,8 +26,8 @@ public class Driver {
 
     public void HitWall(HitWallEvent e) { 
        System.out.println("I hit a wall") ;
-       distance = this.bot.getDistanceRemaining();
-       this.bot.setAhead(-distance);
+       distance = bot.getDistanceRemaining();
+       bot.setAhead(-distance);
     }
 }
 

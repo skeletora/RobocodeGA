@@ -16,7 +16,9 @@ JFLAGS = -encoding UTF-8  -classpath ${FINAL_PATH} -Xlint:deprecation
 
 DRIVER_CLASSES = driver/DriverFactory.java driver/Driver.java driver/NonDriver.java driver/ContinuousDriver.java driver/DriverUtils.java driver/MoveOrTurnDriver.java driver/DuckAndCoverDriver.java
 
-CLASSES = GenericBot.java  parser/Parser.java ${DRIVER_CLASSES}
+GUNNER_CLASSES = gunner/Gunner.java gunner/GunnerFactory.java gunner/NonGunner.java gunner/RandomGunner.java
+
+CLASSES = GenericBot.java  parser/Parser.java ${DRIVER_CLASSES} ${GUNNER_CLASSES}
 
 default: ${classes}
 	${JC} ${JFLAGS} ${CLASSES} 
@@ -25,3 +27,4 @@ clean:
 	rm -f *.class
 	rm -f driver/*.class
 	rm -f parser/*.class
+	rm -f gunner/*.class
