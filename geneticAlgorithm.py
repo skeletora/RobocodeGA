@@ -502,6 +502,10 @@ class GA():
                 else:
                     skipClamp = False
 
+                if column == "Move Dir":
+                    if column not in MOVEMENT_OPTIONS["Move Dir"]:
+                        df.loc[index, column] = random.choice(MOVEMENT_OPTIONS[column])
+
             for minKey in minKeys:
                 subCat1 = minKey.split()
 
