@@ -4,6 +4,9 @@
 import pandas as pd
 import random
 import numpy as np
+import os
+import subprocess
+import ast
 
 ########## VARIABLES AND CONSTANT DEFINITIONS ##########
 
@@ -62,7 +65,7 @@ class GA():
             print(f"Number of children per generation: {numChildren}")
 
         ##### GENETIC ALGORITHM VALID METHODS DEFINITION #####
-        self.VALID_FITNESS = {}
+        self.VALID_FITNESS = {"driver" : self.Driver}
         self.VALID_SURVIVOR = {"genitor" : self.Genitor}
         self.VALID_PARENT = {"stochastic" : self.StochasticUnivSampling}
         self.VALID_PROBABILITY = {"score" : self.ScoreBasedProbability}
@@ -258,6 +261,34 @@ class GA():
 
     ########## SUBFUNCTIONS FOR EACH PHASE ##########
     ##### FITNESS SUBFUNCTIONS #####
+    def _ConvertData(self, results):
+        #results is a CompleteProcess from the subprocess library
+        lines = results.stdout.split('\n')
+        #Removes empty list element at the end
+        if lines[len(lines) - 1] == '':
+            lines.pop(len(lines) - 1)
+
+        modGenomes = []
+        nLine = []
+
+        count = 0
+        for line in lines:
+            count += 1
+            if DEBUG and DEBUG_FITNESS: print(f"Line {count} is: {line} and has type {type(line)}")
+            nLine = ast.literal_eval(line)
+            #NOTE: nLine list elements are: ["genome," "place," "???," "score," "% of points"]
+            #NOTE: That the "genome" element goes "movement parameters separated by commas":"Next behavior group separated by commas":...
+            iF DEBUG and DEBUG_FITNESS: print(f"\tBut is now: {nLine} and has type {type(nLine)}")
+
+
+    def Driver(self, driverFile = None):
+    #NOTE: Need to add additional parameters and such to call.
+    #NOTE: Might want to change this so they provide the file name and this appends cwd to it
+        if driverFile == None:
+            print("Cannot run algorithm without a driver.")
+        else:
+            results = subprocess.run(driverFile, cwd = os.getcwd(), stdout = subprocess.PIPE, encoding = "utf-8")
+            results = self._ConvertData(results)
 
     ##### SURVIVOR SELECTION SUBFUNCTIONS #####
     def Genitor(self):
