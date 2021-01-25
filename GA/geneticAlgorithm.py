@@ -11,7 +11,7 @@ import ast
 
 #To include RunRobocode.  This needs modified to work with whatever computer it is run on.
 filePath = os.getcwd()
-filePath = filePath[:len(filePath) - 2] + "DanCode\\ParallelRun"
+filePath = os.path.join(filePath[:len(filePath) - 2], "DanCode", "ParallelRun")
 #print(filePath)
 sys.path.insert(1, filePath)
 #print(sys.path) #This checks to make sure it has been added properly

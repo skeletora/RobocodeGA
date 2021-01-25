@@ -16,6 +16,11 @@ public class ContinuousDriver extends Driver {
 
         System.out.println("Hiring a continuous driver");
 
+        //The way this works for X,Y is:
+        //X indicates the colon segment
+        //  ex) movement - 0: ??? - 1: ??? - 2:...
+        //Y indicates the index within that colon
+        //  ex) 1 (0),0 (1),30 (2):3 (0), 10 (1):...
         MIN_DISTANCE = parser.Argument(0,1);
         MAX_DISTANCE = parser.Argument(0,2);
         MIN_ANGLE = parser.Argument(0,3);
@@ -46,4 +51,3 @@ public class ContinuousDriver extends Driver {
         }
     }
 }
-
