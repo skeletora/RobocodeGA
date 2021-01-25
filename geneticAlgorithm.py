@@ -278,7 +278,7 @@ class GA():
             nLine = ast.literal_eval(line)
             #NOTE: nLine list elements are: ["genome," "place," "???," "score," "% of points"]
             #NOTE: That the "genome" element goes "movement parameters separated by commas":"Next behavior group separated by commas":...
-            iF DEBUG and DEBUG_FITNESS: print(f"\tBut is now: {nLine} and has type {type(nLine)}")
+            if DEBUG and DEBUG_FITNESS: print(f"\tBut is now: {nLine} and has type {type(nLine)}")
 
 
     def Driver(self, driverFile = None):
@@ -469,6 +469,15 @@ class GA():
     def PrintPopStatus(self):
         print(f"Current Generation: {self.generation}")
         print(self.population)
+
+    def Generation(self, fitMethod = None, survivorMethod = None, probMethod = None, parentMethod = None,
+                    recombMethod = None, weight = 0.5, mutationMethod = None, mutationRate = 0.05, mutationVariance = 1.0):
+        #Insert call to Robocode driver
+        self.FitnessFunc(fitMethod)
+        self.SurvivorSelection(survivorMethod)
+        self.ParentSelection(probMethod, parentMethod)
+        self.Recombination(recombMethod, weight)
+        self.Mutate(mutationMethod, mutationRate, mutationVariance)
 
     def _CreateDataframe(self, indexSize):
         dataframe = pd.DataFrame(columns = ["Score", "Move Pattern",
