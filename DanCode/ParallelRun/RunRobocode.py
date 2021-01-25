@@ -17,8 +17,9 @@ def RunBot(cmd,bot, fileName):
             stats = line.split()
             res.append(bot);
             res.append(stats[0]);
-            res.append(stats[2]);
+            res.append(stats[1]);
             res.append(stats[3]);
+            res.append(stats[4]);
     o.close();
     os.remove(fileName);
 
