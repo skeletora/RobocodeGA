@@ -569,7 +569,7 @@ class GA():
 
         for index in df.index:
             for column in df.columns:
-                if DEBUG:
+                if DEBUG and DEBUG_FIX:
                     print(f"Rounding {df.loc[index, column]} at ({index}, {column})")
 
                 value = int(round(df.loc[index, column]))
@@ -583,7 +583,7 @@ class GA():
                 else:
                     skipClamp = True
 
-                if DEBUG:
+                if DEBUG and DEBUG_FIX:
                     print(f"The value of skipClamp is: {skipClamp}")
                 if not skipClamp:
                     df.loc[index, column] = self._Clamp(value, valRange[column][0], valRange[column][1])
@@ -601,7 +601,7 @@ class GA():
                     subCat2 = maxKey.split()
 
                     if subCat1[1] == subCat2[1]:
-                        if DEBUG:
+                        if DEBUG and DEBUG_FIX:
                             print(f"Found a match! It's {minKey} and {maxKey}")
 
                         if df.loc[index, minKey] > df.loc[index, maxKey]:
