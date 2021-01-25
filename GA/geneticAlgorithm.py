@@ -4,9 +4,18 @@
 import pandas as pd
 import random
 import numpy as np
+import sys
 import os
 import subprocess
 import ast
+
+#To include RunRobocode.  This needs modified to work with whatever computer it is run on.
+filePath = os.getcwd()
+filePath = filePath[:len(filePath) - 2] + "DanCode\\ParallelRun"
+#print(filePath)
+sys.path.insert(1, filePath)
+#print(sys.path) #This checks to make sure it has been added properly
+from RunRobocode import *
 
 ########## VARIABLES AND CONSTANT DEFINITIONS ##########
 
@@ -28,14 +37,14 @@ TARGETING_OPTIONS = {"Targeting Pattern" : [0, 3]}
 
 ##### DEBUG VARIABLES AND PARAMETERS #####
 DEBUG = True
-DEBUG_INIT = True
-DEBUG_MAKE_POP = True
+DEBUG_INIT = False
+DEBUG_MAKE_POP = False
 DEBUG_FITNESS = True
-DEBUG_SURVIVOR = True
-DEBUG_PARENT = True
-DEBUG_PROB = True
-DEBUG_RECOMB = True
-DEBUG_MUTATE = True
+DEBUG_SURVIVOR = False
+DEBUG_PARENT = False
+DEBUG_PROB = False
+DEBUG_RECOMB = False
+DEBUG_MUTATE = False
 
 ########## CLASS AND STRUCTURE DEFINITIONS ##########
 
@@ -151,7 +160,7 @@ class GA():
 
     ########## GENETIC ALGORITHM PHASE FUNCTIONS ##########
 
-    def FitnessFunc(self, fitMethod = None):
+    def FitnessFunc(self, fitMethod = None, driverFile = None):
         if DEBUG and DEBUG_FITNESS:
             print("--------------------------------------------------")
             print("INSIDE FITNESS FUNCTION")
@@ -160,7 +169,7 @@ class GA():
             fitMethod = self._FirstKey(self.VALID_FITNESS)
 
 
-        self.VALID_FITNESS[fitMethod]()
+        self.VALID_FITNESS[fitMethod](driverFile)
 
         if DEBUG and DEBUG_FITNESS:
             print("END OF FITNESS FUNCTION")
@@ -280,6 +289,38 @@ class GA():
             #NOTE: That the "genome" element goes "movement parameters separated by commas":"Next behavior group separated by commas":...
             if DEBUG and DEBUG_FITNESS: print(f"\tBut is now: {nLine} and has type {type(nLine)}")
 
+    def _ConvertPop(self):
+        generation = []
+        indiv = ''
+        mvKey = list(MOVEMENT_OPTIONS.keys())
+        tKey = list(TARGETING_OPTIONS.keys())
+        bsKey = list(BULLET_STRAT_OPTIONS.keys())
+
+        for individual in self.population.index:
+            for cat in range(len(mvKey)):
+                indiv = indiv + str(self.population.loc[individual, mvKey[cat]])
+                if cat < len(mvKey) - 1:
+                    indiv = indiv + ','
+
+            indiv = indiv + ':'
+
+            for cat in range(len(tKey)):
+                indiv = indiv + str(self.population.loc[individual, tKey[cat]])
+                if cat < len(tKey) - 1:
+                    indiv = indiv + ','
+
+            indiv = indiv + ':'
+
+            for cat in range(len(bsKey)):
+                indiv = indiv + str(self.population.loc[individual, bsKey[cat]])
+                if cat < len(bsKey) - 1:
+                    indiv = indiv + ','
+
+            if DEBUG and DEBUG_FITNESS: print(indiv)
+            generation.append(indiv)
+            indiv = ''
+
+        return generation
 
     def Driver(self, driverFile = None):
     #NOTE: Need to add additional parameters and such to call.
@@ -287,8 +328,14 @@ class GA():
         if driverFile == None:
             print("Cannot run algorithm without a driver.")
         else:
-            results = subprocess.run(driverFile, cwd = os.getcwd(), stdout = subprocess.PIPE, encoding = "utf-8")
+            '''
+            results = subprocess.run("python " + driverFile, cwd = os.getcwd(), stdout = subprocess.PIPE, encoding = "utf-8")
             results = self._ConvertData(results)
+            '''
+            generation = self._ConvertPop()
+            results = RunGeneration(generation)
+
+            if DEBUG and DEBUG_FITNESS: print(f"Results are:\n{results}")
 
     ##### SURVIVOR SELECTION SUBFUNCTIONS #####
     def Genitor(self):
@@ -470,10 +517,10 @@ class GA():
         print(f"Current Generation: {self.generation}")
         print(self.population)
 
-    def Generation(self, fitMethod = None, survivorMethod = None, probMethod = None, parentMethod = None,
+    def Generation(self, fitMethod = None, driverFile = None, survivorMethod = None, probMethod = None, parentMethod = None,
                     recombMethod = None, weight = 0.5, mutationMethod = None, mutationRate = 0.05, mutationVariance = 1.0):
         #Insert call to Robocode driver
-        self.FitnessFunc(fitMethod)
+        self.FitnessFunc(fitMethod, driverFile)
         self.SurvivorSelection(survivorMethod)
         self.ParentSelection(probMethod, parentMethod)
         self.Recombination(recombMethod, weight)
