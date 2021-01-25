@@ -284,11 +284,11 @@ class GA():
         count = 0
         for line in lines:
             count += 1
-            if DEBUG and DEBUG_FITNESS: print(f"Line {count} is: {line} and has type {type(line)}")
+            #if DEBUG and DEBUG_FITNESS: print(f"Line {count} is: {line} and has type {type(line)}")
             nLine = ast.literal_eval(line)
             #NOTE: nLine list elements are: ["genome," "place," "???," "score," "% of points"]
             #NOTE: That the "genome" element goes "movement parameters separated by commas":"Next behavior group separated by commas":...
-            if DEBUG and DEBUG_FITNESS: print(f"\tBut is now: {nLine} and has type {type(nLine)}")
+            #if DEBUG and DEBUG_FITNESS: print(f"\tBut is now: {nLine} and has type {type(nLine)}")
 
     def _ConvertPop(self):
         generation = []
