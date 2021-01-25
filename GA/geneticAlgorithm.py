@@ -45,6 +45,7 @@ DEBUG_PARENT = False
 DEBUG_PROB = False
 DEBUG_RECOMB = False
 DEBUG_MUTATE = False
+DEBUG_FIX = False
 
 ########## CLASS AND STRUCTURE DEFINITIONS ##########
 
@@ -537,7 +538,7 @@ class GA():
         return dataframe
 
     def _Clamp(self,value, minValue, maxValue):
-        if DEBUG:
+        if DEBUG and DEBUG_FIX:
             print("--------------------------------------------------")
             print("INSIDE CLAMP")
             print(f"value: {value} and [min, max]: [{minValue}, {maxValue}]")
@@ -547,7 +548,7 @@ class GA():
 
     def _FixGenome(self, df):
         #NOTE: CURRENTLY, IF MIN VALUES ARE GREATER THAN MAX VALUES, THEN JUST SETS MIN EQUAL TO THE MAX
-        if DEBUG:
+        if DEBUG and DEBUG_FIX:
             print("--------------------------------------------------")
             print("INSIDE FIX GENOME")
 
@@ -607,7 +608,7 @@ class GA():
                             self.population.loc[index, minKey] = self.population.loc[index, maxKey]
                         break
 
-        if DEBUG:
+        if DEBUG and DEBUG_FIX:
             print("END OF FIX GENOME")
             print("--------------------------------------------------")
 
