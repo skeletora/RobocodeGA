@@ -409,7 +409,7 @@ class GA():
             print("INSIDE MATCH RESULTS FUNCTION")
 
         genomeCat = list(MOVEMENT_OPTIONS.keys()) + list(TARGETING_OPTIONS.keys()) + list(BULLET_STRAT_OPTIONS.keys())
-        popIndex = self.population.index
+        popIndex = list(self.population.index)
 
         rDF = self._ConvertResults(results)
 
