@@ -178,7 +178,7 @@ class GA():
         results = self.Driver()
         self.MatchResults(results)
 
-        self.VALID_FITNESS[fitMethod]()
+        #self.VALID_FITNESS[fitMethod]()
 
         if DEBUG and DEBUG_FITNESS:
             print("END OF FITNESS FUNCTION")
@@ -374,24 +374,24 @@ class GA():
 
             j = 0 #keeps track of the movement option it is currently on
             for key in list(MOVEMENT_OPTIONS.keys()):
-                resultsDF.loc[i, key] = mvCat[j]
+                resultsDF.loc[i, key] = float(mvCat[j])
                 j = j + 1
 
             j = 0 #keeps track of the targeting option it is currently on
             for key in list(TARGETING_OPTIONS.keys()):
-                resultsDF.loc[i, key] = tCat[j]
+                resultsDF.loc[i, key] = float(tCat[j])
                 j = j + 1
 
             j = 0 #keeps track of the bullet strategy option it is currently on
             for key in list(BULLET_STRAT_OPTIONS.keys()):
-                resultsDF.loc[i, key] = bsCat[j]
+                resultsDF.loc[i, key] = float(bsCat[j])
                 j = j + 1
 
             #FITNESS_OPTIONS = {"Place" : "Place", "Score" : "Score", "Point Percentage" : "Point Percentage"}
 
-            resultsDF.loc[i, "Place"]  = results[1]
-            resultsDF.loc[i, "Score"]  = results[3]
-            resultsDF.loc[i, "Point Percentage"]  = results[4]
+            resultsDF.loc[i, "Place"]  = result[1]
+            resultsDF.loc[i, "Score"]  = int(result[3])
+            resultsDF.loc[i, "Point Percentage"]  = int(result[4])
 
             i = i + 1
 
