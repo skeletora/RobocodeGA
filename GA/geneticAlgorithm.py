@@ -389,10 +389,11 @@ class GA():
 
             #FITNESS_OPTIONS = {"Place" : "Place", "Score" : "Score", "Point Percentage" : "Point Percentage"}
 
-            resultsDF.loc[i, "Place"]  = result[1]
+            resultsDF.loc[i, "Place"]  = int(result[1][:-3])
             resultsDF.loc[i, "Score"]  = int(result[3])
-            #resultsDF.loc[i, "Point Percentage"]  = float(result[4][1, result[4].find('%')]) / 100
-            resultsDF.loc[i, "Point Percentage"]  = result[4]
+            resultsDF.loc[i, "Point Percentage"]  = float(result[4][1 : result[4].find('%')]) / 100
+            #resultsDF.loc[i, "Point Percentage"]  = result[4]
+            resultsDF.loc[i, "Probability"] = 0
 
             i = i + 1
 
