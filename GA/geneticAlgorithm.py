@@ -40,15 +40,15 @@ FITNESS_OPTIONS = {"Place" : "Place", "Score" : "Score", "Point Percentage" : "P
 
 ##### DEBUG VARIABLES AND PARAMETERS #####
 DEBUG = True
-DEBUG_INIT = True
-DEBUG_MAKE_POP = True
+DEBUG_INIT = False
+DEBUG_MAKE_POP = False
 DEBUG_FITNESS = True
-DEBUG_SURVIVOR = True
-DEBUG_PARENT = True
-DEBUG_PROB = True
-DEBUG_RECOMB = True
-DEBUG_MUTATE = True
-DEBUG_FIX = True
+DEBUG_SURVIVOR = False
+DEBUG_PARENT = False
+DEBUG_PROB = False
+DEBUG_RECOMB = False
+DEBUG_MUTATE = False
+DEBUG_FIX = False
 
 ########## CLASS AND STRUCTURE DEFINITIONS ##########
 
@@ -299,6 +299,9 @@ class GA():
             #if DEBUG and DEBUG_FITNESS: print(f"\tBut is now: {nLine} and has type {type(nLine)}")
 
     def _ConvertPop(self):
+        if DEBUG and DEBUG_FITNESS:
+            print("--------------------------------------------------")
+            print("INSIDE CONVERT POPULATION FUNCTION")
         generation = []
         indiv = ''
         mvKey = list(MOVEMENT_OPTIONS.keys())
@@ -329,26 +332,88 @@ class GA():
             generation.append(indiv)
             indiv = ''
 
+        if DEBUG and DEBUG_FITNESS:
+            print("END OF CONVERT POPULATION FUNCTION")
+            print("--------------------------------------------------")
         return generation
 
     def Driver(self):
+        if DEBUG and DEBUG_FITNESS:
+            print("--------------------------------------------------")
+            print("INSIDE DRIVER FUNCTION")
+
         generation = self._ConvertPop()
         results = RunGeneration(generation)
 
-        if DEBUG and DEBUG_FITNESS: print(f"Results are:\n{results}")
+        if DEBUG and DEBUG_FITNESS:
+            print(f"Results are:\n{results}")
+            print("END OF DRIVER FUNCTION")
+            print("--------------------------------------------------")
+
         return results
 
-    def MatchResults(self, results):
-        categories = results.split(':')
-        mvCat = categories[0].split(',')
-        tCat = categories[1].split(',')
-        bsCat = categories[2].split(',')
+    def _ConvertResults(self, results):
+        if DEBUG and DEBUG_FITNESS:
+            print("--------------------------------------------------")
+            print("INSIDE CONVERT RESULTS FUNCTION")
+
+        resultsDF = self._CreateDataframe(len(results))
+
+        i = 0 #keep track of which result is being examined
+        for result in results:
+            categories = result[0].split(':')
+            mvCat = categories[0].split(',')
+            tCat = categories[1].split(',')
+            bsCat = categories[2].split(',')
+
+            if DEBUG and DEBUG_FITNESS:
+                print(f"Categories is: {categories}")
+                print(f"mvCat is: {mvCat}")
+                print(f"tCat is: {tCat}")
+                print(f"bsCat is: {bsCat}")
+
+            j = 0 #keeps track of the movement option it is currently on
+            for key in list(MOVEMENT_OPTIONS.keys()):
+                resultsDF.loc[i, key] = mvCat[j]
+                j = j + 1
+
+            j = 0 #keeps track of the targeting option it is currently on
+            for key in list(TARGETING_OPTIONS.keys()):
+                resultsDF.loc[i, key] = tCat[j]
+                j = j + 1
+
+            j = 0 #keeps track of the bullet strategy option it is currently on
+            for key in list(BULLET_STRAT_OPTIONS.keys()):
+                resultsDF.loc[i, key] = bsCat[j]
+                j = j + 1
+
+            #FITNESS_OPTIONS = {"Place" : "Place", "Score" : "Score", "Point Percentage" : "Point Percentage"}
+
+            resultsDF.loc[i, "Place"]  = results[1]
+            resultsDF.loc[i, "Score"]  = results[3]
+            resultsDF.loc[i, "Point Percentage"]  = results[4]
+
+            i = i + 1
 
         if DEBUG and DEBUG_FITNESS:
-            print(f"Categories is: {categories}")
-            print(f"mvCat is: {mvCat}")
-            print(f"tCat is: {tCat}")
-            print(f"bsCat is: {bsCat}")
+            print(f"Results data frame is:\n{resultsDF}")
+            print("END OF CONVERT RESULTS FUNCTION")
+            print("--------------------------------------------------")
+        return resultsDF
+
+    def MatchResults(self, results):
+        if DEBUG and DEBUG_FITNESS:
+            print("--------------------------------------------------")
+            print("INSIDE MATCH RESULTS FUNCTION")
+
+        rDF = self._ConvertResults(results)
+
+
+
+        if DEBUG and DEBUG_FITNESS:
+            print("END OF MATCH RESULTS FUNCTION")
+            print("--------------------------------------------------")
+
 
     ##### SURVIVOR SELECTION SUBFUNCTIONS #####
     def Genitor(self):
