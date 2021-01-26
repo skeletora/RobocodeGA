@@ -35,17 +35,20 @@ BULLET_STRAT_OPTIONS = {"Bullet Pattern" : [0, 4]}
 #Valid options for targeting strategies
 TARGETING_OPTIONS = {"Targeting Pattern" : [0, 3]}
 
+#Valid options for fitness evaluation
+FITNESS_OPTIONS = {"Place" : "Place", "Score" : "Score", "Point Percentage" : "Point Percentage"}
+
 ##### DEBUG VARIABLES AND PARAMETERS #####
 DEBUG = True
-DEBUG_INIT = False
-DEBUG_MAKE_POP = False
+DEBUG_INIT = True
+DEBUG_MAKE_POP = True
 DEBUG_FITNESS = True
-DEBUG_SURVIVOR = False
-DEBUG_PARENT = False
-DEBUG_PROB = False
-DEBUG_RECOMB = False
-DEBUG_MUTATE = False
-DEBUG_FIX = False
+DEBUG_SURVIVOR = True
+DEBUG_PARENT = True
+DEBUG_PROB = True
+DEBUG_RECOMB = True
+DEBUG_MUTATE = True
+DEBUG_FIX = True
 
 ########## CLASS AND STRUCTURE DEFINITIONS ##########
 
@@ -121,8 +124,11 @@ class GA():
 
         #Randomly generates gene values based on the valid parameters specified above
         for i in self.population.index:
-            self.population.loc[i, "Score"] = 0 # Initializes individual score to zero at start.
             self.population.loc[i, "Probability"] = 0 # Initializes the individual's probability of being selected to zero at start
+
+            #Set all fitness values to be zero at the start
+            for category in FITNESS_OPTIONS.keys():
+                self.population.loc[i, category] = 0
 
             #Set up movement parameters
             for category in MOVEMENT_OPTIONS.keys():
@@ -161,7 +167,7 @@ class GA():
 
     ########## GENETIC ALGORITHM PHASE FUNCTIONS ##########
 
-    def FitnessFunc(self, fitMethod = None, driverFile = None):
+    def FitnessFunc(self, fitMethod = None):
         if DEBUG and DEBUG_FITNESS:
             print("--------------------------------------------------")
             print("INSIDE FITNESS FUNCTION")
@@ -169,8 +175,10 @@ class GA():
         if fitMethod == None:
             fitMethod = self._FirstKey(self.VALID_FITNESS)
 
+        results = self.Driver()
+        self.MatchResults(results)
 
-        self.VALID_FITNESS[fitMethod](driverFile)
+        self.VALID_FITNESS[fitMethod]()
 
         if DEBUG and DEBUG_FITNESS:
             print("END OF FITNESS FUNCTION")
@@ -323,20 +331,24 @@ class GA():
 
         return generation
 
-    def Driver(self, driverFile = None):
-    #NOTE: Need to add additional parameters and such to call.
-    #NOTE: Might want to change this so they provide the file name and this appends cwd to it
-        if driverFile == None:
-            print("Cannot run algorithm without a driver.")
-        else:
-            '''
-            results = subprocess.run("python " + driverFile, cwd = os.getcwd(), stdout = subprocess.PIPE, encoding = "utf-8")
-            results = self._ConvertData(results)
-            '''
-            generation = self._ConvertPop()
-            results = RunGeneration(generation)
+    def Driver(self):
+        generation = self._ConvertPop()
+        results = RunGeneration(generation)
 
-            if DEBUG and DEBUG_FITNESS: print(f"Results are:\n{results}")
+        if DEBUG and DEBUG_FITNESS: print(f"Results are:\n{results}")
+        return results
+
+    def MatchResults(self, results):
+        categories = results.split(':')
+        mvCat = categories[0].split(',')
+        tCat = categories[1].split(',')
+        bsCat = categories[2].split(',')
+
+        if DEBUG and DEBUG_FITNESS:
+            print(f"Categories is: {categories}")
+            print(f"mvCat is: {mvCat}")
+            print(f"tCat is: {tCat}")
+            print(f"bsCat is: {bsCat}")
 
     ##### SURVIVOR SELECTION SUBFUNCTIONS #####
     def Genitor(self):
@@ -421,8 +433,7 @@ class GA():
             print(f"Parent 1 is: {parent1}")
             print(f"Parent 2 is: {parent2}")
 
-        genomeCat = ["Move Pattern","Min Dist","Max Dist","Min Rot", "Max Rot","Move Delay",
-                     "Move Dir","Move Vel", "Bullet Pattern","Targeting Pattern"]
+        genomeCat = list(MOVEMENT_OPTIONS.keys()) + list(TARGETING_OPTIONS.keys()) + list(BULLET_STRAT_OPTIONS.keys())
 
         par1 = self.population.loc[parent1, genomeCat].tolist()
         par2 = self.population.loc[parent2, genomeCat].tolist()
@@ -438,9 +449,9 @@ class GA():
             if childCount + 1 < self.numChildren:
                 self.children.loc[childCount + 1, key] = child2[i]
             i = i + 1
-        self.children.loc[childCount, ["Score", "Probability"]] = 0
+        self.children.loc[childCount, list(FITNESS_OPTIONS.keys()) + ["Probability"]] = 0
         if childCount + 1 < self.numChildren:
-            self.children.loc[childCount + 1, ["Score", "Probability"]] = 0
+            self.children.loc[childCount + 1, list(FITNESS_OPTIONS.keys()) + ["Probability"]] = 0
 
         if DEBUG and DEBUG_RECOMB:
             print(f"Par1 is: {par1}")
@@ -460,8 +471,7 @@ class GA():
             print(f"Weight is: {weight}")
 
 
-        genomeCat = ["Move Pattern","Min Dist","Max Dist","Min Rot", "Max Rot","Move Delay",
-                     "Move Dir","Move Vel", "Bullet Pattern","Targeting Pattern"]
+        genomeCat = list(MOVEMENT_OPTIONS.keys()) + list(TARGETING_OPTIONS.keys()) + list(BULLET_STRAT_OPTIONS.keys())
 
         par1 = self.population.loc[parent1, genomeCat].tolist()
         par2 = self.population.loc[parent2, genomeCat].tolist()
@@ -479,9 +489,9 @@ class GA():
             if childCount + 1 < self.numChildren:
                 self.children.loc[childCount + 1, key] = child2[i]
             i = i + 1
-        self.children.loc[childCount, ["Score", "Probability"]] = 0
+        self.children.loc[childCount, list(FITNESS_OPTIONS.keys()) + ["Probability"]] = 0
         if childCount + 1 < self.numChildren:
-            self.children.loc[childCount + 1, ["Score", "Probability"]] = 0
+            self.children.loc[childCount + 1, list(FITNESS_OPTIONS.keys()) + ["Probability"]] = 0
 
         if DEBUG and DEBUG_RECOMB:
             print(f"Par1 is: {par1}")
@@ -498,8 +508,7 @@ class GA():
             print("--------------------------------------------------")
             print("INSIDE GAUSSIAN MUTATION")
 
-        genomeCat = ["Move Pattern","Min Dist","Max Dist","Min Rot", "Max Rot","Move Delay",
-                     "Move Dir","Move Vel", "Bullet Pattern","Targeting Pattern"]
+        genomeCat = list(MOVEMENT_OPTIONS.keys()) + list(TARGETING_OPTIONS.keys()) + list(BULLET_STRAT_OPTIONS.keys())
 
         for category in genomeCat:
             if DEBUG and DEBUG_MUTATE:
@@ -518,23 +527,18 @@ class GA():
         print(f"Current Generation: {self.generation}")
         print(self.population)
 
-    def Generation(self, fitMethod = None, driverFile = None, survivorMethod = None, probMethod = None, parentMethod = None,
+    def Generation(self, fitMethod = None, survivorMethod = None, probMethod = None, parentMethod = None,
                     recombMethod = None, weight = 0.5, mutationMethod = None, mutationRate = 0.05, mutationVariance = 1.0):
-        #Insert call to Robocode driver
-        self.FitnessFunc(fitMethod, driverFile)
+        self.FitnessFunc(fitMethod)
         self.SurvivorSelection(survivorMethod)
         self.ParentSelection(probMethod, parentMethod)
         self.Recombination(recombMethod, weight)
         self.Mutate(mutationMethod, mutationRate, mutationVariance)
 
     def _CreateDataframe(self, indexSize):
-        dataframe = pd.DataFrame(columns = ["Score", "Move Pattern",
-                                                  "Min Dist","Max Dist",
-                                                  "Min Rot", "Max Rot",
-                                                  "Move Delay", "Move Dir",
-                                                  "Move Vel", "Bullet Pattern",
-                                                  "Targeting Pattern", "Probability"],
-                                 index = [i for i in range(indexSize)])
+        columnNames = list(MOVEMENT_OPTIONS.keys()) + list(TARGETING_OPTIONS.keys()) + \
+                        list(BULLET_STRAT_OPTIONS.keys()) + list(FITNESS_OPTIONS.keys()) + ["Probability"]
+        dataframe = pd.DataFrame(columns = columnNames, index = [i for i in range(indexSize)])
         return dataframe
 
     def _Clamp(self,value, minValue, maxValue):
@@ -552,10 +556,6 @@ class GA():
             print("--------------------------------------------------")
             print("INSIDE FIX GENOME")
 
-        """
-        ["Score", "Move Pattern", "Min Dist","Max Dist", "Min Rot", "Max Rot", "Move Delay", "Move Dir",
-         "Move Vel", "Bullet Pattern", "Targeting Pattern", "Probability"]
-        """
         skipClamp = False
         minKeys = []
         maxKeys = []
