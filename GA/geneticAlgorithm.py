@@ -408,8 +408,17 @@ class GA():
             print("--------------------------------------------------")
             print("INSIDE MATCH RESULTS FUNCTION")
 
+        genomeCat = list(MOVEMENT_OPTIONS.keys()) + list(TARGETING_OPTIONS.keys()) + list(BULLET_STRAT_OPTIONS.keys())
+
         rDF = self._ConvertResults(results)
 
+        for result in rDF.index:
+            for indiv in self.population.index:
+                if DEBUG and DEBUG_FITNESS:
+                    print(f"Comparing result (left) to population (right):\n{rDF.loc[result, genomeCat]}\t{self.population.loc[indiv, genomeCat]}")
+                if rDF.loc[result, genomeCat].eq(self.population.loc[indiv, genomeCat]):
+                    if DEBUG and DEBUG_FITNESS: print("IT'S A MATCH!")
+                    break
 
 
         if DEBUG and DEBUG_FITNESS:
