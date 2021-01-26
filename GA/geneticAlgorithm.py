@@ -415,8 +415,8 @@ class GA():
         for result in rDF.index:
             for indiv in self.population.index:
                 if DEBUG and DEBUG_FITNESS:
-                    print(f"Comparing result (left) to population (right):\n{rDF.loc[result, genomeCat]}\t{self.population.loc[indiv, genomeCat]}")
-                if rDF.loc[result, genomeCat].eq(self.population.loc[indiv, genomeCat]):
+                    print(f"Comparing result (top) to population (bottom):\n{rDF.loc[result, genomeCat]}\n{self.population.loc[indiv, genomeCat]}")
+                if rDF.loc[result, genomeCat] == (self.population.loc[indiv, genomeCat]):
                     if DEBUG and DEBUG_FITNESS: print("IT'S A MATCH!")
                     break
 
