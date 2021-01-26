@@ -43,7 +43,7 @@ DEBUG = True
 DEBUG_INIT = False
 DEBUG_MAKE_POP = False
 DEBUG_FITNESS = False
-DEBUG_SURVIVOR = True
+DEBUG_SURVIVOR = False
 DEBUG_PARENT = False
 DEBUG_PROB = False
 DEBUG_RECOMB = False
@@ -200,6 +200,7 @@ class GA():
         if survivorMethod == None:
             survivorMethod = self._FirstKey(self.VALID_SURVIVOR)
         self.VALID_SURVIVOR[survivorMethod]()
+        self.generation = self.generation + 1
 
         if DEBUG and DEBUG_SURVIVOR:
             print("END OF SURVIVOR SELECTION")
@@ -615,6 +616,10 @@ class GA():
 
     def Generation(self, fitMethod = None, survivorMethod = None, probMethod = None, parentMethod = None,
                     recombMethod = None, weight = 0.5, mutationMethod = None, mutationRate = 0.05, mutationVariance = 1.0):
+        if DEBUG:
+            self.population = self.population.sort_values(by = ["Score"], ascending = False)
+            self.PrintPopStatus()
+
         self.FitnessFunc(fitMethod)
         self.ParentSelection(probMethod, parentMethod)
         self.Recombination(recombMethod, weight)
