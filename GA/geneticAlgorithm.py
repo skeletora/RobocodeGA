@@ -189,12 +189,17 @@ class GA():
             print("--------------------------------------------------")
             print("INSIDE SURVIVOR SELECTION")
 
+        '''
         if self.generation == 0:
             self.generation = 1
         else:
             if survivorMethod == None:
                 survivorMethod = self._FirstKey(self.VALID_SURVIVOR)
             self.VALID_SURVIVOR[survivorMethod]()
+        '''
+        if survivorMethod == None:
+            survivorMethod = self._FirstKey(self.VALID_SURVIVOR)
+        self.VALID_SURVIVOR[survivorMethod]()
 
         if DEBUG and DEBUG_SURVIVOR:
             print("END OF SURVIVOR SELECTION")
@@ -611,10 +616,10 @@ class GA():
     def Generation(self, fitMethod = None, survivorMethod = None, probMethod = None, parentMethod = None,
                     recombMethod = None, weight = 0.5, mutationMethod = None, mutationRate = 0.05, mutationVariance = 1.0):
         self.FitnessFunc(fitMethod)
-        self.SurvivorSelection(survivorMethod)
         self.ParentSelection(probMethod, parentMethod)
         self.Recombination(recombMethod, weight)
         self.Mutate(mutationMethod, mutationRate, mutationVariance)
+        self.SurvivorSelection(survivorMethod)
 
     def _CreateDataframe(self, indexSize):
         columnNames = list(MOVEMENT_OPTIONS.keys()) + list(TARGETING_OPTIONS.keys()) + \
