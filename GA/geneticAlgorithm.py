@@ -42,8 +42,8 @@ FITNESS_OPTIONS = {"Place" : "Place", "Score" : "Score", "Point Percentage" : "P
 DEBUG = True
 DEBUG_INIT = False
 DEBUG_MAKE_POP = False
-DEBUG_FITNESS = True
-DEBUG_SURVIVOR = False
+DEBUG_FITNESS = False
+DEBUG_SURVIVOR = True
 DEBUG_PARENT = False
 DEBUG_PROB = False
 DEBUG_RECOMB = False
@@ -438,6 +438,7 @@ class GA():
             print("INSIDE GENITOR")
 
         self.population = self.population.sort_values(by = ["Score"], ascending = False)
+        if DEBUG and DEBUG_SURVIVOR: self.PrintPopStatus()
         self.population = pd.concat([self.population.iloc[:len(self.population.index) - self.numChildren], self.children],
                                     ignore_index = True)
 
