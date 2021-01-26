@@ -391,7 +391,8 @@ class GA():
 
             resultsDF.loc[i, "Place"]  = result[1]
             resultsDF.loc[i, "Score"]  = int(result[3])
-            resultsDF.loc[i, "Point Percentage"]  = float(result[4][1, result[4].find('%')]) / 100
+            #resultsDF.loc[i, "Point Percentage"]  = float(result[4][1, result[4].find('%')]) / 100
+            resultsDF.loc[i, "Point Percentage"]  = result[4]
 
             i = i + 1
 
